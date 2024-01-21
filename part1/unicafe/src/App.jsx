@@ -1,21 +1,25 @@
 import { useState } from 'react'
 
-const Header = (props) => <h1>{props.header}</h1>
+const Header = ({header}) => <h1>{header}</h1>
 
-const Button = (props) => {
-  return (
+const Button = (props) => (
   <button onClick={props.handleClick}>
     {props.text}
   </button>
-  )
-}
+)
 
-const Statistics = (props) => {
+const Statistics = ({good, neutral, bad}) => {
+  const total = good + neutral + bad
+  const avg = (good - bad)/total //neutral is 0 and bad is -1
+  const positive = (good/total)*100
   return (
     <div>
-      <p>good {props.good}</p>
-      <p>neutral {props.neutral}</p>
-      <p>bad {props.bad}</p>
+      <p>good {good}</p>
+      <p>neutral {neutral}</p>
+      <p>bad {bad}</p>
+      <p>total {total}</p>
+      <p>average {avg}</p>
+      <p>positive {positive} %</p>
     </div>
   )
 }
