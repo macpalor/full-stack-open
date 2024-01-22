@@ -18,8 +18,11 @@ const App = () => {
   const [votes, setVotes] = useState(Array(anecdotes.length).fill(0))
   const [selected, setSelected] = useState(0)
 
-  const nextAnecdote = (arr) => {
-    const randInt = Math.floor(Math.random() * arr.length) //random integer from 0 to arr.length
+  const nextAnecdote = (arr, selected) => {
+    let randInt = Math.floor(Math.random() * arr.length) //random integer from 0 to arr.length
+    while (randInt === selected) { //ensures that no anecdote is chosen twice in a row
+      randInt = Math.floor(Math.random() * arr.length)
+    }
     setSelected(randInt)
   }
 
@@ -47,7 +50,7 @@ const App = () => {
       <Header header={"Anecdote of the day"} />
       <p>{anecdotes[selected]}</p>
       <p>has {votes[selected]} votes</p>
-      <Button onClick={() => nextAnecdote(anecdotes)} text="next anecdote" />
+      <Button onClick={() => nextAnecdote(anecdotes, selected)} text="next anecdote" />
       <Button onClick={() => vote(votes, selected)} text="vote" />
       <Header header={"Anecdote with the most votes"} />
       <p>{anecdotes[indexOfMax(votes)]}</p>
