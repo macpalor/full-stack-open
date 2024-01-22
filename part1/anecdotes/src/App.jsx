@@ -16,7 +16,6 @@ const App = () => {
     'The only way to go fast, is to go well.'
   ]
   const [votes, setVotes] = useState(Array(anecdotes.length).fill(0))
-
   const [selected, setSelected] = useState(0)
 
   const nextAnecdote = (arr) => {
@@ -29,6 +28,19 @@ const App = () => {
     copy[index] += 1
     setVotes(copy)
   }
+
+  const indexOfMax = (arr) => {
+    let max = 0
+    let max_i = 0
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] > max) {
+        max = arr[i]
+        max_i = i
+      }
+      
+    }
+    return max_i
+  }
   
   return (
     <div>
@@ -37,6 +49,9 @@ const App = () => {
       <p>has {votes[selected]} votes</p>
       <Button onClick={() => nextAnecdote(anecdotes)} text="next anecdote" />
       <Button onClick={() => vote(votes, selected)} text="vote" />
+      <Header header={"Anecdote with the most votes"} />
+      <p>{anecdotes[indexOfMax(votes)]}</p>
+      <p>has {votes[indexOfMax(votes)]} votes</p>
     </div>
   )
 }
