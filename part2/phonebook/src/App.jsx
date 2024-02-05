@@ -40,7 +40,7 @@ const Persons = ({persons, filter}) => {
   }
 }
 const App = () => {
-  
+
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
@@ -61,9 +61,16 @@ const App = () => {
     if (persons.some(item => areNamesEqual(person.name, item.name))) {
       alert(`${newName} is already added to the phonebook`)
     } else {
-      setPersons(persons.concat(person))
-      setNewName('')
-      setNewNumber('')
+      axios
+      .post('http://localhost:3001/persons', person)
+      .then(response => {
+        setPersons(persons.concat(response.data))
+        setNewName('')
+        setNewNumber('')
+      })
+      //setPersons(persons.concat(person))
+      //setNewName('')
+      //setNewNumber('')
     }
   }
 
