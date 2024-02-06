@@ -4,7 +4,7 @@ import personService from './services/persons'
 const Filter = (props) => {
   return (
     <div>
-      filter shown with <input value={props.filter} onChange={props.handleFilterChange}/>
+      filter shown with <input value={props.filter} onChange={props.onFilterChange}/>
     </div>
   )
 }
@@ -13,10 +13,10 @@ const PersonForm = (props) => {
   return (
     <form onSubmit={props.addName}>
       <div>
-        name: <input value={props.newName} onChange={props.handleNameChange} />
+        name: <input value={props.newName} onChange={props.onNameChange} />
       </div>
       <div>
-        number: <input value={props.newNumber} onChange={props.handleNumberChange} />
+        number: <input value={props.newNumber} onChange={props.onNumberChange} />
       </div>
       <div>
         <button type="submit">add</button>
@@ -25,20 +25,26 @@ const PersonForm = (props) => {
   )
 }
 
-const Person = ({name, number}) => <p>{name} {number}</p> 
-
-const Persons = ({persons, filter}) => {
-  if (filter === '') {
-    return (
-      persons.map(person => <Person key={person.name} name={person.name} number={person.number} />)
-    )
-  } else {
-    const filtered = persons.filter(item => item.name.toLowerCase().includes(filter.toLowerCase()))
-    return (
-      filtered.map(person => <Person key={person.name} name={person.name} number={person.number} />)
-    )
-  }
+const Person = ({person, onDelete}) => {
+  return (
+    <p>
+      {person.name} {person.number} 
+      <button onClick={(event) => onDelete(event, person)}>delete</button>
+    </p>
+  ) 
 }
+
+const Persons = ({persons, onDelete}) => {
+  return (
+    persons.map(person =>
+      <Person 
+        key={person.id} 
+        person={person}
+        onDelete={onDelete}
+      />)
+  )
+}
+
 const App = () => {
 
   const [persons, setPersons] = useState([])
@@ -69,8 +75,13 @@ const App = () => {
         setNewNumber('')
       })
     }
+    console.log("Added ", person)
   }
 
+  const areNamesEqual = (name1, name2) => {
+    return JSON.stringify(name1) === JSON.stringify(name2)
+  }
+  
   const handleNameChange = (event) => {
     //console.log(event.target.value)
     setNewName(event.target.value)
@@ -86,29 +97,37 @@ const App = () => {
     setFilter(event.target.value)
   }
 
-  const areNamesEqual = (name1, name2) => {
-    return JSON.stringify(name1) === JSON.stringify(name2)
+  const handleDelete = (event, person) => {
+    event.preventDefault()
+    if (confirm(`Delete ${person.name}?`)) {
+      personService.remove(person.id)
+      setPersons(persons.filter(item => item.id !== person.id))
+    }
   }
+
+  const filtered = filter === '' 
+  ? persons 
+  : persons.filter(item => item.name.toLowerCase().includes(filter.toLowerCase()))
 
   return (
     <div>
       <h2>Phonebook</h2>
       
-      <Filter filter={filter} handleFilterChange={handleFilterChange} />
+      <Filter filter={filter} onFilterChange={handleFilterChange} />
       
       <h3>Add new</h3>
       
       <PersonForm
         addName={addName}
         newName={newName}
-        handleNameChange={handleNameChange}
+        onNameChange={handleNameChange}
         newNumber={newNumber}
-        handleNumberChange={handleNumberChange}
+        onNumberChange={handleNumberChange}
       />
       
       <h3>Numbers</h3>
 
-      <Persons persons={persons} filter={filter} />
+      <Persons persons={filtered} onDelete={handleDelete}/>
     </div>
   )
 }
