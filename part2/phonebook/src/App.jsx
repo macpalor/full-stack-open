@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+
+  return (
+    <div className="message">
+      {message}
+    </div>
+  )
+}
+
 const Filter = (props) => {
   return (
     <div>
@@ -58,6 +70,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
 
   useEffect(() => {
     personService
@@ -70,21 +83,25 @@ const App = () => {
   const addName = (event) => {
     event.preventDefault()
     const newId = `${persons.length + 1}`
-    const person = {id: newId, name: newName, number: newNumber}
+    const newPerson = {id: newId, name: newName, number: newNumber}
     
-    if (persons.some(item => areNamesEqual(person.name, item.name))) {
-      if (confirm(`${person.name} is already added to the phonebook, replace the old
+    if (persons.some(item => areNamesEqual(newPerson.name, item.name))) {
+      if (confirm(`${newPerson.name} is already added to the phonebook, replace the old
       number with a new one?`)) {
-        const updated = updateNumber(person.name, person.number)
+        const updated = updateNumber(newPerson.name, newPerson.number)
       } 
     } else {
       personService
-      .create(person)
+      .create(newPerson)
       .then(returnedPerson => {
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
-        console.log("Added ", person)
+        console.log("Added ", newPerson)
+        setMessage(`Added ${newPerson.name}`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
       })
     }
     
@@ -100,6 +117,10 @@ const App = () => {
       setNewName('')
       setNewNumber('')
       console.log("Updated", updated)
+      setMessage(`Changed ${updatedPerson.name}`)
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
     })
   }
 
@@ -143,8 +164,10 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
+      <h1>Phonebook</h1>
       
+      <Notification message={message} />
+
       <Filter filter={filter} onFilterChange={handleFilterChange} />
       
       <h3>Add new</h3>
