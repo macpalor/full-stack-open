@@ -1,67 +1,9 @@
 import { useState, useEffect } from 'react'
+import Notification from './components/Notification'
+import Filter from './components/Filter' 
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 import personService from './services/persons'
-
-const Notification = ({ message, messageType }) => {
-  if (message === null) {
-    return null
-  }
-  return (
-    <div className={messageType}>
-      {message}
-    </div>
-  )
-}
-
-const Filter = (props) => {
-  return (
-    <div>
-      filter shown with <input value={props.filter} onChange={props.onFilterChange}/>
-    </div>
-  )
-}
-
-const PersonForm = (props) => {
-  return (
-    <form onSubmit={props.addName}>
-      <div>
-        name: <input value={props.newName} onChange={props.onNameChange} />
-      </div>
-      <div>
-        number: <input value={props.newNumber} onChange={props.onNumberChange} />
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  )
-}
-
-const Person = ({person, onDelete}) => {
-  return (
-    <tr>
-      <td>{person.name}</td>
-      <td>{person.number}</td>
-      <td>
-        <button onClick={(event) => onDelete(event, person)}>delete</button>
-      </td>
-    </tr>
-  ) 
-}
-
-const Persons = ({persons, onDelete}) => {
-  return (
-    <table>
-      <tbody>
-        {persons.map(person =>
-      <Person 
-        key={person.id} 
-        person={person}
-        onDelete={onDelete}
-      />)}
-      </tbody>
-    </table>
-  )
-}
 
 const App = () => {
 
