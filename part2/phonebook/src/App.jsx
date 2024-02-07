@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 
-const Notification = ({ message }) => {
+const Notification = ({ message, messageType }) => {
   if (message === null) {
     return null
   }
-
   return (
-    <div className="message">
+    <div className={messageType}>
       {message}
     </div>
   )
@@ -71,6 +70,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
   const [message, setMessage] = useState(null)
+  const [messageType, setMessageType] = useState('')
 
   useEffect(() => {
     personService
@@ -88,16 +88,17 @@ const App = () => {
     if (persons.some(item => areNamesEqual(newPerson.name, item.name))) {
       if (confirm(`${newPerson.name} is already added to the phonebook, replace the old
       number with a new one?`)) {
-        const updated = updateNumber(newPerson.name, newPerson.number)
+        updateNumber(newPerson.name, newPerson.number)
       } 
     } else {
       personService
       .create(newPerson)
       .then(returnedPerson => {
+        console.log("Added ", newPerson)
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
-        console.log("Added ", newPerson)
+        setMessageType('success')
         setMessage(`Added ${newPerson.name}`)
         setTimeout(() => {
           setMessage(null)
@@ -114,10 +115,19 @@ const App = () => {
     .replaceNumber(updatedPerson.id, updatedPerson)
     .then(updated => {
       setPersons(persons.map(item => item.id !== updated.id ? item : updated))
+      console.log("Updated", updated)
+      setMessageType('success')
+      setMessage(`Updated ${updatedPerson.name}`)
+    })
+    .catch(error => {
+      console.log("Change failed: ", error)
+      setPersons(persons.filter(item => item.id !== updatedPerson.id))
+      setMessageType('error')
+      setMessage(`Information of ${updatedPerson.name} has already been removed from the server`)
+    })
+    .finally(() => {
       setNewName('')
       setNewNumber('')
-      console.log("Updated", updated)
-      setMessage(`Changed ${updatedPerson.name}`)
       setTimeout(() => {
         setMessage(null)
       }, 5000)
@@ -129,17 +139,14 @@ const App = () => {
   }
   
   const handleNameChange = (event) => {
-    //console.log(event.target.value)
     setNewName(event.target.value)
   }
 
   const handleNumberChange = (event) => {
-    //console.log(event.target.value)
     setNewNumber(event.target.value)
   }
 
   const handleFilterChange = (event) => {
-    //console.log(event.target.value)
     setFilter(event.target.value)
   }
 
@@ -150,10 +157,21 @@ const App = () => {
       .remove(person.id)
       .then(deleted => {
         setPersons(persons.filter(item => item.id !== deleted.id))
-        console.log("Deleted", deleted);
+        setMessageType('success')
+        setMessage(`Deleted ${deleted.name}`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+        console.log("Deleted", deleted)
       })
       .catch(error => {
         console.log('Deletion failed:', error)
+        setMessageType('error')
+        setMessage(`Information of ${person.name} has already been removed from the server`)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
+        setPersons(persons.filter(item => item.id !== person.id))
       })
     }
   }
@@ -166,7 +184,7 @@ const App = () => {
     <div>
       <h1>Phonebook</h1>
       
-      <Notification message={message} />
+      <Notification message={message} messageType={messageType} />
 
       <Filter filter={filter} onFilterChange={handleFilterChange} />
       
