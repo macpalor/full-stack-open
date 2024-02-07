@@ -27,21 +27,28 @@ const PersonForm = (props) => {
 
 const Person = ({person, onDelete}) => {
   return (
-    <p>
-      {person.name} {person.number} 
-      <button onClick={(event) => onDelete(event, person)}>delete</button>
-    </p>
+    <tr>
+      <td>{person.name}</td>
+      <td>{person.number}</td>
+      <td>
+        <button onClick={(event) => onDelete(event, person)}>delete</button>
+      </td>
+    </tr>
   ) 
 }
 
 const Persons = ({persons, onDelete}) => {
   return (
-    persons.map(person =>
+    <table>
+      <tbody>
+        {persons.map(person =>
       <Person 
         key={person.id} 
         person={person}
         onDelete={onDelete}
-      />)
+      />)}
+      </tbody>
+    </table>
   )
 }
 
@@ -62,10 +69,14 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault()
-    const person = {name: newName, number: newNumber}
+    const newId = `${persons.length + 1}`
+    const person = {id: newId, name: newName, number: newNumber}
     
     if (persons.some(item => areNamesEqual(person.name, item.name))) {
-      alert(`${newName} is already added to the phonebook`)
+      if (confirm(`${person.name} is already added to the phonebook, replace the old
+      number with a new one?`)) {
+        const updated = updateNumber(person.name, person.number)
+      } 
     } else {
       personService
       .create(person)
@@ -73,9 +84,23 @@ const App = () => {
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
+        console.log("Added ", person)
       })
     }
-    console.log("Added ", person)
+    
+  }
+
+  const updateNumber = (name, newNumber) => {  
+    const match = persons.find(item => areNamesEqual(item.name, name))
+    const updatedPerson = {...match, number: newNumber}
+    personService
+    .replaceNumber(updatedPerson.id, updatedPerson)
+    .then(updated => {
+      setPersons(persons.map(item => item.id !== updated.id ? item : updated))
+      setNewName('')
+      setNewNumber('')
+      console.log("Updated", updated)
+    })
   }
 
   const areNamesEqual = (name1, name2) => {
@@ -100,8 +125,15 @@ const App = () => {
   const handleDelete = (event, person) => {
     event.preventDefault()
     if (confirm(`Delete ${person.name}?`)) {
-      personService.remove(person.id)
-      setPersons(persons.filter(item => item.id !== person.id))
+      personService
+      .remove(person.id)
+      .then(deleted => {
+        setPersons(persons.filter(item => item.id !== deleted.id))
+        console.log("Deleted", deleted);
+      })
+      .catch(error => {
+        console.log('Deletion failed:', error)
+      })
     }
   }
 
