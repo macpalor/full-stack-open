@@ -10,8 +10,11 @@ const Filter = (props) => {
 }
 
 const Country = ({country}) => {
-  console.log("country is", country)
-  console.log("languages", Object.values(country.languages))
+  //console.log("country is", country)
+  //console.log("languages", Object.values(country.languages))
+  const flagUrl = country.flags['png']
+  //console.log("flag url is", flagUrl)
+
   return (
     <>
       <h2>{country.name.common}</h2>
@@ -24,6 +27,8 @@ const Country = ({country}) => {
         {Object.values(country.languages).map(item =>
           <li key={item}>{item}</li>)}
       </ul>
+
+      <img className='flag' src={flagUrl} alt={`Flag of ${country.name.common}`} />
     </>
   )
 }
@@ -63,6 +68,7 @@ const App = () => {
     axios
     .get('https://studies.cs.helsinki.fi/restcountries/api/all')
     .then(response => {
+      console.log('fetching countries...')
       setCountries(response.data)
     })
   }, [])
