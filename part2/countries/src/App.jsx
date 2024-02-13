@@ -24,8 +24,8 @@ const Country = ({country}) => {
 
       <b>Languages:</b>
       <ul>
-        {Object.values(country.languages).map(item =>
-          <li key={item}>{item}</li>)}
+        {Object.values(country.languages).map((item, id) =>
+          <li key={id}>{item}</li>)}
       </ul>
 
       <img className='flag' src={flagUrl} alt={`Flag of ${country.name.common}`} />
@@ -33,7 +33,8 @@ const Country = ({country}) => {
   )
 }
 
-const Countries = ({countries}) => {
+const Countries = ({countries, onShow}) => {
+  //console.log("shown is", isShown)
   if (countries.length > 10) {
     return (
       <div>
@@ -44,9 +45,13 @@ const Countries = ({countries}) => {
     return (
       <table>
         <tbody>
-          {countries.map(item => 
-          <tr key={item.name.common}>
-            <td>{item.name.common}</td>
+          {countries.map((item, id) => 
+          <tr key={id}>
+            {item.display ? null : <td>{item.name.common}</td>}
+            {item.display ? <td> <Country country={item} /> </td> : null}
+            <td>
+              <button onClick={() => onShow(item)}>{item.display ? "hide" : "show"}</button>
+            </td>
           </tr>
           )}
         </tbody>
@@ -69,7 +74,8 @@ const App = () => {
     .get('https://studies.cs.helsinki.fi/restcountries/api/all')
     .then(response => {
       console.log('fetching countries...')
-      setCountries(response.data)
+      // add a field to hide/display a country when rendering
+      setCountries(response.data.map(item => ({...item, display : false})))
     })
   }, [])
   
@@ -77,8 +83,18 @@ const App = () => {
     return null
   }
 
+  
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
+  }
+
+  const toggleShow = (country) => {
+    const countryName = countries.find(item => item.name.common === country.name.common)
+    const changedCountry = {...countryName, display: !countryName.display}
+    setCountries(countries.map(item => 
+      item.name.common !== country.name.common
+      ? item
+      : changedCountry))
   }
 
   const filtered = filter === "" 
@@ -88,7 +104,7 @@ const App = () => {
   return (
     <>
       <Filter filter={filter} onFilterChange={handleFilterChange} />
-      <Countries countries={filtered} />
+      <Countries countries={filtered} onShow={toggleShow} />
     </>
   )
 }
