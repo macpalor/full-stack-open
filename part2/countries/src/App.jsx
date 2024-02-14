@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import countryService from './services/countries'
+import weatherService from './services/weather'
 
 const Filter = (props) => {
   return (
@@ -9,11 +10,36 @@ const Filter = (props) => {
   )
 }
 
+const Weather = ({weather}) => {
+  if (!weather) {
+    return null
+  }
+
+  const iconUrl = `https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`
+
+  return (
+    <>
+      <h3>Weather in {weather.name}</h3>
+      <p>Temperature {weather.main.temp} Celsius</p>
+      <img src={iconUrl} />
+      <p>Wind {weather.wind.speed} m/s</p>
+    </>
+  )
+}
+
 const Country = ({country}) => {
-  //console.log("country is", country)
-  //console.log("languages", Object.values(country.languages))
-  const flagUrl = country.flags['png']
-  //console.log("flag url is", flagUrl)
+  const [capitalWeather, setCapitalWeather] = useState(null)
+
+  useEffect(() => {
+    weatherService
+    .getWeather(country.capital[0])
+    .then(response => {
+      console.log('Fetching weather data for', country.capital[0])
+      setCapitalWeather(response)
+    })
+    .catch(error => console.log('Failed to fetch weather data', error))
+  }, [country.capital[0]])
+
 
   return (
     <>
@@ -28,13 +54,13 @@ const Country = ({country}) => {
           <li key={id}>{item}</li>)}
       </ul>
 
-      <img className='flag' src={flagUrl} alt={`Flag of ${country.name.common}`} />
+      <img className='flag' src={country.flags.png} alt={country.flags.alt} />
+      <Weather weather={capitalWeather} />
     </>
   )
 }
 
 const Countries = ({countries, onShow}) => {
-  //console.log("shown is", isShown)
   if (countries.length > 10) {
     return (
       <div>
@@ -56,7 +82,6 @@ const Countries = ({countries, onShow}) => {
           )}
         </tbody>
       </table>
-      //countries.map(item => <div>{item.name.common}</div>)
     )
   } else if (countries.length === 1) {
     return (
@@ -70,13 +95,14 @@ const App = () => {
   const [countries, setCountries] = useState(null)
 
   useEffect(() => {
-    axios
-    .get('https://studies.cs.helsinki.fi/restcountries/api/all')
+    countryService
+    .getAll()
     .then(response => {
-      console.log('fetching countries...')
+      console.log('Fetching countries...')
       // add a field to hide/display a country when rendering
-      setCountries(response.data.map(item => ({...item, display : false})))
+      setCountries(response.map(item => ({...item, display : false})))
     })
+    .catch(error => console.log("Failed to fetch countries", error))
   }, [])
   
   if (!countries) {
