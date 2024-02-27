@@ -24,9 +24,10 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault()
-    const newId = `${persons.length + 1}`
-    const newPerson = {id: newId, name: newName, number: newNumber}
-    
+    //const newId = Number(persons.length + 1)
+    //const newPerson = {id: newId, name: newName, number: newNumber}
+    const newPerson = {name: newName, number: newNumber}
+
     if (persons.some(item => areNamesEqual(newPerson.name, item.name))) {
       if (confirm(`${newPerson.name} is already added to the phonebook, replace the old
       number with a new one?`)) {
@@ -36,18 +37,17 @@ const App = () => {
       personService
       .create(newPerson)
       .then(returnedPerson => {
-        console.log("Added ", newPerson)
+        console.log("Added ", returnedPerson)
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
         setMessageType('success')
-        setMessage(`Added ${newPerson.name}`)
+        setMessage(`Added ${returnedPerson.name}`)
         setTimeout(() => {
           setMessage(null)
         }, 5000)
       })
     }
-    
   }
 
   const updateNumber = (name, newNumber) => {  
