@@ -24,8 +24,7 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault()
-    //const newId = Number(persons.length + 1)
-    //const newPerson = {id: newId, name: newName, number: newNumber}
+
     const newPerson = {name: newName, number: newNumber}
 
     if (persons.some(item => areNamesEqual(newPerson.name, item.name))) {
