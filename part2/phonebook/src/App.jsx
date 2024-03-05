@@ -39,20 +39,29 @@ const App = () => {
       .then(returnedPerson => {
         console.log("Added ", returnedPerson)
         setPersons(persons.concat(returnedPerson))
-        setNewName('')
-        setNewNumber('')
         setMessageType('success')
         setMessage(`Added ${returnedPerson.name}`)
+      })
+      .catch(error => {
+        console.log("Error: ", error)
+        setMessageType('error')
+        setMessage(error.response.data.error.message)
+      })
+      .finally(() => {
+        setNewName('')
+        setNewNumber('')
         setTimeout(() => {
           setMessage(null)
         }, 5000)
       })
+      
     }
   }
 
   const updateNumber = (name, newNumber) => {  
     const match = persons.find(item => areNamesEqual(item.name, name))
     const updatedPerson = {...match, number: newNumber}
+   
     personService
     .replaceNumber(updatedPerson.id, updatedPerson)
     .then(updated => {
@@ -63,9 +72,13 @@ const App = () => {
     })
     .catch(error => {
       console.log("Change failed: ", error)
-      setPersons(persons.filter(item => item.id !== updatedPerson.id))
       setMessageType('error')
-      setMessage(`Information of ${updatedPerson.name} has already been removed from the server`)
+      if (error.name === 'TypeError') {
+        setPersons(persons.filter(item => item.id !== updatedPerson.id))
+        setMessage(`Information of ${updatedPerson.name} has already been removed from the server`)
+      } else if (error.response.data.error.name === "ValidationError") {
+        setMessage(error.response.data.error.message)
+      }
     })
     .finally(() => {
       setNewName('')
@@ -97,14 +110,14 @@ const App = () => {
     if (confirm(`Delete ${person.name}?`)) {
       personService
       .remove(person.id)
-      .then(deleted => {
-        setPersons(persons.filter(item => item.id !== deleted.id))
+      .then(response => {
+        setPersons(persons.filter(item => item.id !== person.id))
         setMessageType('success')
-        setMessage(`Deleted ${deleted.name}`)
+        setMessage(`Deleted ${person.name}`)
         setTimeout(() => {
           setMessage(null)
         }, 5000)
-        console.log("Deleted", deleted)
+        console.log("Deleted", person)
       })
       .catch(error => {
         console.log('Deletion failed:', error)
