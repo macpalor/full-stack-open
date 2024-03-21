@@ -5,10 +5,10 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 
 const blogSchema = new mongoose.Schema({
-  title: String,
-  author: String,
-  url: String,
-  likes: Number
+    title: String,
+    author: String,
+    url: String,
+    likes: Number
 })
 
 const Blog = mongoose.model('Blog', blogSchema)
@@ -28,20 +28,20 @@ app.use(cors())
 app.use(express.json())
 
 app.get('/api/blogs', (request, response) => {
-  Blog
+    Blog
     .find({})
     .then(blogs => {
-      response.json(blogs)
+        response.json(blogs)
     })
 })
 
 app.post('/api/blogs', (request, response) => {
-  const blog = new Blog(request.body)
+    const blog = new Blog(request.body)
 
-  blog
+    blog
     .save()
     .then(result => {
-      response.status(201).json(result)
+        response.status(201).json(result)
     })
 })
 
