@@ -99,6 +99,28 @@ describe('when there are initially some blogs saved', () => {
         })
     })
 
+    describe('viewing a specific blog', () => {
+        test('succeeds with a valid id', async () => {
+            const blogsAtStart = await helper.blogsInDb()
+            const blogToView = blogsAtStart[0]
+
+            const resultBlog = await api
+                .get(`/api/blogs/${blogToView.id}`)
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+
+            assert.deepStrictEqual(resultBlog.body, blogToView)
+        })
+
+        test('fails with status code 404 if blog does not exist', async () => {
+            const validNonExistingId = helper.nonExistingId()
+
+            await api
+                .get(`/api/${validNonExistingId}`)
+                .expect(404)
+        })
+    })
+
     describe('deletion of a blog', () => {
         test('succeeds with status code 204 if id is valid', async () => {
             const blogsAtStart = await helper.blogsInDb()
