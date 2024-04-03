@@ -61,6 +61,26 @@ test('a valid blog can be added', async () => {
     assert(titles.includes('My Blog'))
 })
 
+test.only('if the value of "likes" is missing, it defaults to 0', async () => {
+    const newBlog = {
+        title: 'My Blog',
+        author: 'John Doe',
+        url: 'https://www.myblogurl.com',
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    const addedBlog = blogsAtEnd[blogsAtEnd.length - 1]
+
+    assert.strictEqual(Object.hasOwn(addedBlog, 'likes'), true)
+    assert.strictEqual(addedBlog.likes, 0)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
