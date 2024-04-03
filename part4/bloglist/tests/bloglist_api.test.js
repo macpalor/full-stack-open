@@ -23,15 +23,42 @@ test('blogs are returned as json', async () => {
         .expect('Content-Type', /application\/json/)
 })
 
-test('there are six blogs', async () => {
+test('all blogs are returned', async () => {
     const response = await api.get('/api/blogs')
     assert.strictEqual(response.body.length, helper.initialBlogs.length)
+})
+
+test('a specific blog is within the returned blogs', async () => {
+    const response = await api.get('/api/blogs')
+    const titles = response.body.map(blog => blog.title)
+    assert(titles.includes('Canonical string reduction'))
 })
 
 test('blogs have property named "id"', async () => {
     const response = await api.get('/api/blogs')
     const haveIds = response.body.filter(blog => Object.hasOwn(blog, 'id'))
     assert.strictEqual(haveIds.length, response.body.length)
+})
+
+test('a valid blog can be added', async () => {
+    const newBlog = {
+        title: 'My Blog',
+        author: 'John Doe',
+        url: 'https://www.myblogurl.com',
+        likes: 1
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
+
+    const titles = blogsAtEnd.map(blog => blog.title)
+    assert(titles.includes('My Blog'))
 })
 
 after(async () => {
