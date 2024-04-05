@@ -180,27 +180,128 @@ describe('when there is initially one user in db', () => {
         await user.save()
     })
 
-    test('creation succeeds with a fresh username', async () => {
-        const usersAtStart = await helper.usersInDb()
+    describe('creating a new user', () => {
+        test('succeeds with a fresh username', async () => {
+            const usersAtStart = await helper.usersInDb()
+    
+            const newUser = {
+                username: 'johndoe',
+                name: 'John Doe',
+                password: 'secret'
+            }
+    
+            await api
+                .post('/api/users')
+                .send(newUser)
+                .expect(201)
+                .expect('Content-Type', /application\/json/)
+    
+            const usersAtEnd = await helper.usersInDb()
+            assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
+    
+            const usernames = usersAtEnd.map(user => user.username)
+            assert(usernames.includes(newUser.username))
+        })
+    
+        describe('fails with status code 400 if', () => {
+            test('username is already taken',
+            async () => {
+                const usersAtStart = await helper.usersInDb()
+        
+                const newUser = {
+                    username: 'root',
+                    name: 'Superuser',
+                    password: 'secret'
+                }
+        
+                const result = await api
+                    .post('/api/users')
+                    .send(newUser)
+                    .expect(400)
+                    .expect('Content-Type', /application\/json/)
+        
+                const usersAtEnd = await helper.usersInDb()
+                assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+                assert(result.body.error.includes('expected `username` to be unique'))
+            })
+    
+            test('username is missing', async () => {
+                const usersAtStart = await helper.usersInDb()
+        
+                const newUser = {
+                    name: 'Superuser',
+                    password: 'secret'
+                }
+        
+                await api
+                    .post('/api/users')
+                    .send(newUser)
+                    .expect(400)
+                    .expect('Content-Type', /application\/json/)
+        
+                const usersAtEnd = await helper.usersInDb()
+                assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+            })
+            
+            test('username is less than 3 characters', async () => {
+                const usersAtStart = await helper.usersInDb()
+        
+                const newUser = {
+                    username: 'us',
+                    name: 'Superuser',
+                    password: 'secret'
+                }
+        
+                await api
+                    .post('/api/users')
+                    .send(newUser)
+                    .expect(400)
+                    .expect('Content-Type', /application\/json/)
+        
+                const usersAtEnd = await helper.usersInDb()
+                assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+            })
 
-        const newUser = {
-            username: 'johndoe',
-            name: 'John Doe',
-            password: 'secret'
-        }
+            test('password is missing', async () => {
+                const usersAtStart = await helper.usersInDb()
+        
+                const newUser = {
+                    username: 'user',
+                    name: 'Superuser',
+                }
+        
+                await api
+                    .post('/api/users')
+                    .send(newUser)
+                    .expect(400)
+                    .expect('Content-Type', /application\/json/)
+        
+                const usersAtEnd = await helper.usersInDb()
+                assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+            })
 
-        await api
-            .post('/api/users')
-            .send(newUser)
-            .expect(201)
-            .expect('Content-Type', /application\/json/)
+            test('password is less than 3 characters', async () => {
+                const usersAtStart = await helper.usersInDb()
+        
+                const newUser = {
+                    username: 'user',
+                    name: 'Superuser',
+                    password: 'pw'
+                }
+        
+                await api
+                    .post('/api/users')
+                    .send(newUser)
+                    .expect(400)
+                    .expect('Content-Type', /application\/json/)
+        
+                const usersAtEnd = await helper.usersInDb()
+                assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+            })
 
-        const usersAtEnd = await helper.usersInDb()
-        assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
-
-        const usernames = usersAtEnd.map(user => user.username)
-        assert(usernames.includes(newUser.username))
+        })
     })
+
 })
 
 after(async () => {
