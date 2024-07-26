@@ -59,7 +59,6 @@ describe('when there are initially some blogs saved', () => {
                 url: 'https://www.myblogurl.com',
                 likes: 1
             }
-            console.log('new blog', newBlog)
         
             await api
                 .post('/api/blogs')
