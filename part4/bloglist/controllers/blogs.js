@@ -20,8 +20,10 @@ blogsRouter.get('/:id', async (request, response) => {
 blogsRouter.post('/', async (request, response) => {
     const body = request.body
 
-    const user = await User.findById(body.userId)
-
+    //const user = await User.findById(body.userId)
+    let user = await User.find({})
+    user = user['0']
+    //console.log(user['0'].id)
     if (Object.hasOwn(body, 'title') && Object.hasOwn(body, 'url')) {
         const blog = new Blog({
             title: body.title,

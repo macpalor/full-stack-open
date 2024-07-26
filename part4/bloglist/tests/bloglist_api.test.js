@@ -14,6 +14,13 @@ describe('when there are initially some blogs saved', () => {
     beforeEach(async () => {
         await Blog.deleteMany({})
         await Blog.insertMany(helper.initialBlogs)
+        
+        await User.deleteMany({})
+
+        const passwordHash = await bcrypt.hash('sekret', 10)
+        const user = new User({ username: 'root', passwordHash})
+
+        await user.save()
         // const blogObjects = helper.initialBlogs.map(blog => new Blog(blog))
         // const promiseArray = blogObjects.map(blog => blog.save())
         // await Promise.all(promiseArray)
@@ -45,12 +52,14 @@ describe('when there are initially some blogs saved', () => {
     
     describe('addition of a new blog', () => {
         test('a valid blog can be added', async () => {
+  
             const newBlog = {
                 title: 'My Blog',
                 author: 'John Doe',
                 url: 'https://www.myblogurl.com',
                 likes: 1
             }
+            console.log('new blog', newBlog)
         
             await api
                 .post('/api/blogs')
