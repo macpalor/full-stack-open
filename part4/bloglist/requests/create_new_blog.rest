@@ -1,10 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjY2MGZjZTk0YzNiYjZhOWU1MmY4NTM3ZCIsImlhdCI6MTcyMjAyNTcyNH0.HP65rAOuo3YiyS9A1zHaMslFb-0InibYH-UXfAozAXo
 
 {
     "title": "My Blog",
     "author": "John Doe",
     "url": "blogUrl",
     "likes": 1
-    //"userId": "660fce94c3bb6a9e52f8537d"
 }
